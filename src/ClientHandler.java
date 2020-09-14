@@ -27,7 +27,7 @@ public class ClientHandler implements Runnable
                 String request = in.readLine();
                 if(request.contains("Image"))
                 {
-
+                    System.out.println("THIS IMAGE IS AWESOME!!!");
                 }
                 else{
 
