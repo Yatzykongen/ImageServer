@@ -22,9 +22,9 @@ public class ImageServer
             boolean serverOn = true;
             while (serverOn)
             {
-                System.out.println("Waiting for some1 so im not lonely.....");
+                System.out.println("Waiting for connection from UGV....");
                 Socket client = listener.accept();
-                System.out.println("YAY i have a friend :D ");
+                System.out.println("UGV connected!");
                 //BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
                 //String request = in.readLine();
 
@@ -39,7 +39,7 @@ public class ImageServer
         }
         catch (IOException e)
         {
-            System.out.println("fæl");
+            System.out.println("Connection to UGV failed!!");
         }
 //
 //
