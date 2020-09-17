@@ -34,6 +34,7 @@ public class ImageHandler implements Runnable
     @Override
     public void run()
     {
+        // GUSTAV TESTER GIT PÅ STASJA
         try
         {
             int imageCounter = 0;
