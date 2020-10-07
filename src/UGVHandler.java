@@ -2,8 +2,8 @@ import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
-public class RobotHandler
+public class UGVHandler
 {
-    public RobotHandler() throws IOException {
+    public UGVHandler() throws IOException {
     }
 }

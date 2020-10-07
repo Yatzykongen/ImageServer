@@ -8,10 +8,12 @@ import java.util.concurrent.Executors;
 public class ImageServer
 {
     private static final int PORT = 42069;
+    private static final int POOL_SIZE = 5;
 
     private static ArrayList<ClientHandler> clients = new ArrayList<>();
 
-    private static ExecutorService pool = Executors.newFixedThreadPool(3);
+    private static ExecutorService threadPool = Executors.newFixedThreadPool(POOL_SIZE);
+
 
     public static void main(String[] args)
     {
@@ -23,13 +25,18 @@ public class ImageServer
             while (serverOn)
             {
                 System.out.println("Waiting for connection from UGV....");
-                Socket client = listener.accept();
-                System.out.println("UGV connected!");
-                //BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                //String request = in.readLine();
 
-                ImageHandler imageThread = new ImageHandler(client);
-                imageThread.run();
+                Socket client = listener.accept();
+
+                System.out.println("UGV connected!");
+
+                threadPool.execute(new ClientHandler(client));
+
+                //ClientHandler clientHandler = new ClientHandler(client);
+                //clients.add(clientHandler);
+
+                //ImageHandler imageThread = new ImageHandler(client, 10);
+                //imageThread.run();
 
                 //ClientHandler clientThread = new ClientHandler(client);
                 //clients.add(clientThread);

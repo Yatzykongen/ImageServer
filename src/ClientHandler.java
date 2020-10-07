@@ -1,20 +1,20 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+
+import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.Future;
 
 public class ClientHandler implements Runnable
 {
     private Socket client;
-    private BufferedReader in;
-    private PrintWriter out;
+    private InputStream inputStream;
+    private ObjectInputStream objectInputStream;
 
     public ClientHandler(Socket clientSocket) throws IOException
     {
         this.client = clientSocket;
-        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        out = new PrintWriter(client.getOutputStream());
+        this.inputStream = this.client.getInputStream();
+        this.objectInputStream = new ObjectInputStream(inputStream);
     }
 
     @Override
@@ -22,26 +22,40 @@ public class ClientHandler implements Runnable
     {
         try
         {
-            while (true)
-            {
-                String request = in.readLine();
-                if(request.contains("Image"))
-                {
-                    System.out.println("THIS IMAGE IS AWESOME!!!");
-                }
-                else{
+            Command command = (Command) objectInputStream.readObject();
 
-                }
+            switch (command.getCommand())
+            {
+                case "UGV":
+                    UGVHandler ugvHandler = new UGVHandler();
+                    break;
+
+                case "Image":
+                    System.out.println("A image thread is connected");
+                    ImageHandler imageHandler = new ImageHandler(client, objectInputStream, command.getValue());
+                    System.out.println("Run ImageHandler");
+                    imageHandler.run();
+                    System.out.println("ImageHandler done");
+                    break;
+
+                case "User":
+                    UserHandler userHandler = new UserHandler();
+                    break;
             }
+
         }
         catch (IOException e)
         {
             System.out.println(e.getMessage());
         }
+        catch (ClassNotFoundException e)
+        {
+            System.out.println(e.getMessage());
+        }
         finally
         {
-            out.close();
-            //in.close();
+            Thread.currentThread().interrupt();
+            System.out.println("Thread was closed");
         }
     }
 }

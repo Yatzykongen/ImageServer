@@ -1,5 +1,4 @@
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -7,21 +6,25 @@ import javax.imageio.ImageIO;
 
 public class ImageHandler
 {
-    public static void main(String[] args) throws IOException
+    private Socket socket;
+    private InputStream inputStream;
+    private ObjectInputStream objectInputStream;
+    private int totalImages;
+
+    public ImageHandler(Socket socket, ObjectInputStream objectInputStream, int totalImages) throws IOException
     {
-        ServerSocket serverSocket = new ServerSocket(42069);
+        this.socket = socket;
+        this.objectInputStream = objectInputStream;
+        this.totalImages = totalImages;
+    }
 
-        Socket socket = serverSocket.accept();
-        System.out.println("Connected to client!");
-
-        InputStream inputStream = socket.getInputStream();
-        ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+    public void run()
+    {
         int imageCount = 0;
         ImageObject image = null;
-
-
-        while (imageCount < 10) {
-            try
+        try
+        {
+            while (imageCount<totalImages)
             {
                 image = (ImageObject) objectInputStream.readObject();
                 if (!(image.equals(null)) & image.getSize()>20000)
@@ -33,12 +36,16 @@ public class ImageHandler
                     imageCount ++;
                 }
             }
-            catch (ClassNotFoundException e)
-            {
-                System.out.println(e.getMessage());
-            }
+            socket.close();
         }
-        socket.close();
+        catch (IOException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        catch (ClassNotFoundException e)
+        {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void byteArrayToImage(byte[] imageBytes, String filetype, String name) throws IOException
