@@ -14,15 +14,25 @@ public class ImageServer
 
     private static ExecutorService threadPool = Executors.newFixedThreadPool(POOL_SIZE);
 
+    private static ServerSocket listener;
+
 
     public static void main(String[] args)
     {
+        boolean serverOn = true;
+
         try
         {
-            ServerSocket listener = new ServerSocket(PORT);
+            listener = new ServerSocket(PORT);
+        }
+        catch (IOException e)
+        {
+            System.err.println(e.getMessage());
+        }
 
-            boolean serverOn = true;
-            while (serverOn)
+        while (serverOn)
+        {
+            try
             {
                 System.out.println("Waiting for connection from UGV....");
 
@@ -31,22 +41,10 @@ public class ImageServer
                 System.out.println("UGV connected!");
 
                 threadPool.execute(new ClientHandler(client));
-
-                //ClientHandler clientHandler = new ClientHandler(client);
-                //clients.add(clientHandler);
-
-                //ImageHandler imageThread = new ImageHandler(client, 10);
-                //imageThread.run();
-
-                //ClientHandler clientThread = new ClientHandler(client);
-                //clients.add(clientThread);
-
-                //pool.execute(clientThread);
+            } catch (IOException e)
+            {
+                System.err.println(e.getMessage());
             }
-        }
-        catch (IOException e)
-        {
-            System.out.println("Connection to UGV failed!!");
         }
 //
 //

@@ -7,7 +7,6 @@ import javax.imageio.ImageIO;
 public class ImageHandler
 {
     private Socket socket;
-    private InputStream inputStream;
     private ObjectInputStream objectInputStream;
     private int totalImages;
 

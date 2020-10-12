@@ -1,20 +1,21 @@
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-
 import java.io.*;
 import java.net.Socket;
-import java.util.concurrent.Future;
 
 public class ClientHandler implements Runnable
 {
     private Socket client;
     private InputStream inputStream;
+    private OutputStream outputStream;
     private ObjectInputStream objectInputStream;
+    private ObjectOutputStream objectOutputStream;
 
     public ClientHandler(Socket clientSocket) throws IOException
     {
         this.client = clientSocket;
         this.inputStream = this.client.getInputStream();
+        this.outputStream = this.client.getOutputStream();
         this.objectInputStream = new ObjectInputStream(inputStream);
+        this.objectOutputStream = new ObjectOutputStream(outputStream);
     }
 
     @Override
@@ -27,7 +28,11 @@ public class ClientHandler implements Runnable
             switch (command.getCommand())
             {
                 case "UGV":
-                    UGVHandler ugvHandler = new UGVHandler();
+                    System.out.println("A UGV thread is connected");
+                    UGVHandler ugvHandler = new UGVHandler(client, objectInputStream, objectOutputStream);
+                    System.out.println("Run UGV");
+                    ugvHandler.run();
+                    System.out.println("UGV done");
                     break;
 
                 case "Image":
@@ -39,7 +44,11 @@ public class ClientHandler implements Runnable
                     break;
 
                 case "User":
+                    System.out.println("A User thread is connected");
                     UserHandler userHandler = new UserHandler();
+                    System.out.println("Run User");
+                    userHandler.run();
+                    System.out.println("User done");
                     break;
             }
 
