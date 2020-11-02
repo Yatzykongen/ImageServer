@@ -4,13 +4,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
 
-public class ImageHandler
+public class ImageReceiver
 {
     private Socket socket;
     private ObjectInputStream objectInputStream;
     private int totalImages;
 
-    public ImageHandler(Socket socket, ObjectInputStream objectInputStream, int totalImages) throws IOException
+    public ImageReceiver(Socket socket, ObjectInputStream objectInputStream, int totalImages) throws IOException
     {
         this.socket = socket;
         this.objectInputStream = objectInputStream;

@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ImageServer implements Runnable
+public class CommunicationServer
 {
-    private static final int PORT = 42068;
+    private static final int PORT = 42069;
     private static final int POOL_SIZE = 5;
 
     private ExecutorService threadPool = Executors.newFixedThreadPool(POOL_SIZE);
@@ -23,12 +23,11 @@ public class ImageServer implements Runnable
 
     private final Map<Integer, ClientHandler> connectedClients;
 
-    public ImageServer()
+    public CommunicationServer()
     {
         connectedClients = new HashMap<>();
     }
 
-    @Override
     public void run()
     {
         boolean serverOn = true;
@@ -52,7 +51,7 @@ public class ImageServer implements Runnable
 
                 System.out.println("Client connected!");
 
-                clientHandler = new ClientHandler(null,this, client);
+                clientHandler = new ClientHandler(this,null, client);
 
                 threadPool.execute(clientHandler);
 
