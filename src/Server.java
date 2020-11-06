@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class CommunicationServer
+public class Server
 {
     private static final int PORT = 42069;
-    private static final int POOL_SIZE = 5;
+    private static final int POOL_SIZE = 6;
 
     private ExecutorService threadPool = Executors.newFixedThreadPool(POOL_SIZE);
 
@@ -23,7 +26,15 @@ public class CommunicationServer
 
     private final Map<Integer, ClientHandler> connectedClients;
 
-    public CommunicationServer()
+    private AtomicReference<ObjectFile> cacheObjectFile = new AtomicReference<>();
+
+    private AtomicInteger progress = new AtomicInteger();
+
+    private volatile boolean botRunning = false;
+
+    private MeshroomBot meshroomBot = new MeshroomBot(this);
+
+    public Server()
     {
         connectedClients = new HashMap<>();
     }
@@ -88,5 +99,32 @@ public class CommunicationServer
     public void removeClient(int threadID)
     {
         connectedClients.remove(threadID);
+    }
+
+    public synchronized void startBot()
+    {
+        if (!botRunning) {
+            botRunning = true;
+            threadPool.execute(meshroomBot);
+        }
+    }
+
+    public synchronized ObjectFile getObjectFile() { return cacheObjectFile.get(); }
+
+    public synchronized void setObjectFile(ObjectFile objectFile)
+    {
+        cacheObjectFile.set(objectFile);
+    }
+
+    public synchronized void setBotRunningFalse() { botRunning = false; }
+
+    public synchronized void setProgress(int progress)
+    {
+        this.progress.set(progress);
+    }
+
+    public synchronized int getProgress()
+    {
+        return progress.get();
     }
 }

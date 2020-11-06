@@ -13,34 +13,54 @@ public class UGVHandler
     private Command command;
     private AtomicReference<Command> cacheCommand = new AtomicReference<>();
     private UserHandler userHandler = null;
+    private ImageHandler imageHandler;
+    private int numberOfImages = -1;
+    private Thread imageHandlerThread;
+    private Server server;
 
-    public UGVHandler(Socket socket, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream) throws IOException
+    public UGVHandler(Socket socket, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, Server server) throws IOException
     {
         this.socket = socket;
         this.objectInputStream = objectInputStream;
         this.objectOutputStream = objectOutputStream;
+        this.server = server;
+        imageHandler = new ImageHandler(socket, objectInputStream, server);
+        imageHandlerThread = new Thread(imageHandler);
+        imageHandlerThread.start();
     }
 
     public void run()
     {
         try {
-            int timesWithoutRespons = 0;
+            int timesWithoutResponse = 0;
             while (true) {
                 Command command = cacheCommand.get();
                 if(command!=null && command!=this.command)
                 {
                     this.command = command;
                     objectOutputStream.writeObject(command);
-                    System.out.println("command was sendt to ugv");
-                    timesWithoutRespons = 0;
+                    System.out.println("A command was sent to the UGV");
+                    if(command.getCommand().equalsIgnoreCase("start"))
+                    {
+                        imageHandler.setTotalImages(command.getValue());
+                        imageHandler.setUserHandler(userHandler);
+                        imageHandler.start();
+                        System.out.println("A image handler was started");
+                    }
+                    if(command.getCommand().equalsIgnoreCase("stop"))
+                    {
+                        imageHandler.stop();
+                        System.out.println("Image handler was stopped by the User ");
+                    }
+                    timesWithoutResponse = 0;
                 }
-                if (timesWithoutRespons>100)
+                if (timesWithoutResponse>10)
                 {
                     objectOutputStream.writeObject(new Command("ping",0, null, null));
-                    timesWithoutRespons = 0;
+                    timesWithoutResponse = 0;
                 }
                 Thread.sleep(100);
-                timesWithoutRespons++;
+                timesWithoutResponse++;
             }
         }catch (IOException e)
         {

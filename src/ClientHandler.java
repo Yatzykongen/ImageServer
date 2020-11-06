@@ -8,16 +8,16 @@ public class ClientHandler implements Runnable
     private OutputStream outputStream;
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
-    private CommunicationServer communicationServer;
+    private Server server;
     private String instance;
     private int threadID=-1;
     private UGVHandler ugvHandler;
-    private ImageReceiver imageReceiver;
+    private ImageHandler imageHandler;
     private UserHandler userHandler;
 
-    public ClientHandler(CommunicationServer communicationServer, ImageServer imageServer, Socket clientSocket) throws IOException
+    public ClientHandler(Server server, ImageServer imageServer, Socket clientSocket) throws IOException
     {
-        this.communicationServer = communicationServer;
+        this.server = server;
         this.client = clientSocket;
         this.inputStream = this.client.getInputStream();
         this.outputStream = this.client.getOutputStream();
@@ -39,23 +39,15 @@ public class ClientHandler implements Runnable
             {
                 case "UGV":
                     System.out.println("A UGV thread is connected");
-                    ugvHandler = new UGVHandler(client, objectInputStream, objectOutputStream);
+                    ugvHandler = new UGVHandler(client, objectInputStream, objectOutputStream, server);
                     System.out.println("Run UGV");
                     ugvHandler.run();
                     System.out.println("UGV done");
                     break;
 
-                case "Image":
-                    System.out.println("A image thread is connected");
-                    imageReceiver = new ImageReceiver(client, objectInputStream, command.getValue());
-                    System.out.println("Run ImageHandler");
-                    imageReceiver.run();
-                    System.out.println("ImageHandler done");
-                    break;
-
                 case "User":
                     System.out.println("A User thread is connected");
-                    userHandler = new UserHandler(client, objectInputStream, objectOutputStream, communicationServer);
+                    userHandler = new UserHandler(client, objectInputStream, objectOutputStream, server);
                     System.out.println("Run User");
                     userHandler.run();
                     System.out.println("User done");
@@ -78,7 +70,7 @@ public class ClientHandler implements Runnable
             } catch (IOException e) {
                 System.err.println(e.getMessage());
             }
-            communicationServer.removeClient(threadID);
+            server.removeClient(threadID);
             Thread.currentThread().interrupt();
             System.out.println("Thread "+threadID+" was closed");
             return;
