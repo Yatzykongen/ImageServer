@@ -1,5 +1,4 @@
 import java.io.*;
-import java.net.Socket;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -8,16 +7,14 @@ import javax.imageio.ImageIO;
 
 public class ImageHandler implements Runnable
 {
-    private final Socket socket;
     private final ObjectInputStream objectInputStream;
     private AtomicInteger totalImages = new AtomicInteger();
     private volatile boolean run = false;
     private AtomicReference<UserHandler> cachedUserHandler = new AtomicReference<>();
     private Server server;
 
-    public ImageHandler(Socket socket, ObjectInputStream objectInputStream, Server server)
+    public ImageHandler(ObjectInputStream objectInputStream, Server server)
     {
-        this.socket = socket;
         this.objectInputStream = objectInputStream;
         this.server = server;
     }

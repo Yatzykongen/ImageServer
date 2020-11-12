@@ -12,10 +12,9 @@ public class ClientHandler implements Runnable
     private String instance;
     private int threadID=-1;
     private UGVHandler ugvHandler;
-    private ImageHandler imageHandler;
     private UserHandler userHandler;
 
-    public ClientHandler(Server server, ImageServer imageServer, Socket clientSocket) throws IOException
+    public ClientHandler(Server server, Socket clientSocket) throws IOException
     {
         this.server = server;
         this.client = clientSocket;
@@ -39,7 +38,7 @@ public class ClientHandler implements Runnable
             {
                 case "UGV":
                     System.out.println("A UGV thread is connected");
-                    ugvHandler = new UGVHandler(client, objectInputStream, objectOutputStream, server);
+                    ugvHandler = new UGVHandler(objectInputStream, objectOutputStream, server);
                     System.out.println("Run UGV");
                     ugvHandler.run();
                     System.out.println("UGV done");
@@ -47,7 +46,7 @@ public class ClientHandler implements Runnable
 
                 case "User":
                     System.out.println("A User thread is connected");
-                    userHandler = new UserHandler(client, objectInputStream, objectOutputStream, server);
+                    userHandler = new UserHandler(objectInputStream, objectOutputStream, server);
                     System.out.println("Run User");
                     userHandler.run();
                     System.out.println("User done");

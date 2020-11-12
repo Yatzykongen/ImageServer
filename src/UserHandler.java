@@ -2,26 +2,21 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class UserHandler {
-    private Socket client;
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
     private Server server;
-    private boolean auto = false;
     private UGVHandler UGVClient = null;
     private List<String> listUGVs = null;
     private ImageObject imageObject;
     private AtomicReference<ImageObject> cacheImage = new AtomicReference<>();
-    private AtomicReference<ObjectFile> cachedFile = new AtomicReference<>();
     private ObjectFile objectFile = null;
 
-    public UserHandler(Socket client, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, Server server) {
+    public UserHandler(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, Server server) {
         this.server = server;
-        this.client = client;
         this.objectInputStream = objectInputStream;
         this.objectOutputStream = objectOutputStream;
     }
@@ -35,9 +30,9 @@ public class UserHandler {
 
 
                 if (command != null) {
-                    if (command.getWasd()!=null) {
-                        System.out.println("   W: "+ command.getWasd()[0]+"   A: "+ command.getWasd()[1]+"   S: "+ command.getWasd()[2]+"   D: "+ command.getWasd()[3]);
-                    }
+//                    if (command.getWasd()!=null) {
+//                        System.out.println("   W: "+ command.getWasd()[0]+"   A: "+ command.getWasd()[1]+"   S: "+ command.getWasd()[2]+"   D: "+ command.getWasd()[3]);
+//                    }
 
                     switch (command.getCommand()) {
                         case "updateUGVList":
@@ -125,8 +120,6 @@ public class UserHandler {
     public synchronized void setImage(ImageObject imageObject) {
         cacheImage.set(imageObject);
     }
-
-    public synchronized void setObjectFile(ObjectFile objectFile) {cachedFile.set(objectFile);}
 
     public synchronized void setCommandForUGV(Command command)
     {

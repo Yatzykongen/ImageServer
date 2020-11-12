@@ -1,30 +1,25 @@
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class UGVHandler
 {
-    private Socket socket;
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
     private Command command;
     private AtomicReference<Command> cacheCommand = new AtomicReference<>();
     private UserHandler userHandler = null;
     private ImageHandler imageHandler;
-    private int numberOfImages = -1;
     private Thread imageHandlerThread;
     private Server server;
 
-    public UGVHandler(Socket socket, ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, Server server) throws IOException
+    public UGVHandler(ObjectInputStream objectInputStream, ObjectOutputStream objectOutputStream, Server server) throws IOException
     {
-        this.socket = socket;
         this.objectInputStream = objectInputStream;
         this.objectOutputStream = objectOutputStream;
         this.server = server;
-        imageHandler = new ImageHandler(socket, objectInputStream, server);
+        imageHandler = new ImageHandler(objectInputStream, server);
         imageHandlerThread = new Thread(imageHandler);
         imageHandlerThread.start();
     }
