@@ -1,5 +1,10 @@
 import java.io.Serializable;
 
+/**
+ * This ImageObject class is will store a image and will be used to send and receive images.
+ *
+ * @author Sondre Nerhus
+ */
 public class ImageObject implements Serializable
 {
     private static final long serialVersionUID = 2780459376294108401L;
@@ -9,6 +14,15 @@ public class ImageObject implements Serializable
     private String date = null;
     private String filetype = null;
 
+    /**
+     * The constructor of the ImageObject class.
+     *
+     * @param name The name of the image.
+     * @param size The size of the image.
+     * @param imageBytes The image's byte array.
+     * @param date The date the image was taken.
+     * @param filetype The image's file type.
+     */
     public ImageObject(String name, long size, byte[] imageBytes, String date, String filetype)
     {
         this.name = name;

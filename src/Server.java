@@ -1,4 +1,3 @@
-import java.awt.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -12,38 +11,37 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * This Server class is responsible for making new TCP connections and to handle a list of connected clients.
+ * This Server class is responsible for making new TCP connections, handle a list of connected clients and
+ * staring the Meshroom bot.
  *
  * @author Sondre Nerhus
- * @version 0.1
  */
 
 public class Server
 {
-    private static final int PORT = 42069;
-    private static final int POOL_SIZE = 6;
-
-    private ExecutorService threadPool = Executors.newFixedThreadPool(POOL_SIZE);
-
-    private ServerSocket serverSocket;
-
-    private ClientHandler clientHandler;
-
-    private int clientHandlerThreadID;
-
+    private final int PORT;
+    private final ExecutorService threadPool;
     private final Map<Integer, ClientHandler> connectedClients;
-
-    private AtomicReference<ObjectFile> cacheObjectFile = new AtomicReference<>();
-
-    private AtomicInteger progress = new AtomicInteger();
-
+    private final AtomicReference<ObjectFile> cacheObjectFile;
+    private final AtomicInteger progress;
+    private final MeshroomBot meshroomBot;
+    private ServerSocket serverSocket;
     private volatile boolean botRunning = false;
 
-    private MeshroomBot meshroomBot = new MeshroomBot(this);
-
-    public Server()
+    /**
+     * The constructor of the server class.
+     *
+     * @param port The servers listening port.
+     * @param poolSize The pool size for the connected clients.
+     */
+    public Server(int port, int poolSize)
     {
+        this.PORT = port;
+        threadPool = Executors.newFixedThreadPool(poolSize);
         connectedClients = new HashMap<>();
+        cacheObjectFile = new AtomicReference<>();
+        progress = new AtomicInteger();
+        meshroomBot = new MeshroomBot(this);
     }
 
     /**
@@ -53,8 +51,6 @@ public class Server
      */
     public void run()
     {
-        boolean serverOn = true;
-
         try
         {
             serverSocket = new ServerSocket(PORT);
@@ -64,33 +60,31 @@ public class Server
             System.err.println(e.getMessage());
         }
 
-        while (serverOn)
-        {
-            try
-            {
-                System.out.println("Waiting for connection from Client....");
+        while (true)
+            try {
+                System.out.println("----------------------------------------------- Waiting for connection from Client....");
 
                 Socket client = serverSocket.accept();
 
                 System.out.println("Client connected!");
+                System.out.println("-----------------------------------------------");
 
-                clientHandler = new ClientHandler(this, client);
+                ClientHandler clientHandler = new ClientHandler(this, client);
 
+                //Executing the run method in ClientHandler with a thread from the thread pool.
                 threadPool.execute(clientHandler);
 
                 Thread.sleep(1);
 
-                clientHandlerThreadID = clientHandler.getThreadID();
-                System.out.println("New connection accepted, client ID = " + clientHandlerThreadID);
-                connectedClients.put(clientHandlerThreadID, clientHandler);
-            } catch (IOException e)
-            {
-                System.err.println(e.getMessage());
-            }catch (InterruptedException e)
-            {
+                int clientHandlerThreadID = clientHandler.getThreadID();
+                if(clientHandlerThreadID!=-1) {
+                    System.out.println("Client with ID: " + clientHandlerThreadID + " was added to the list connected clients!");
+                    System.out.println("-----------------------------------------------");
+                    connectedClients.put(clientHandlerThreadID, clientHandler);
+                }
+            } catch (IOException | InterruptedException e) {
                 System.err.println(e.getMessage());
             }
-        }
     }
 
     /**

@@ -9,18 +9,34 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * This MeshroomBot class is responsible for controlling the Meshroom application.
+ *
+ * @author Sondre Nerhus
+ */
 public class MeshroomBot implements Runnable {
 
     private Robot robot;
+    private final Server server;
 
-    private ObjectFile objectFile;
-
-    private Server server;
-
+    /**
+     * The constructor of the MeshroomBot class.
+     *
+     * @param server The main server class.
+     */
     public MeshroomBot(Server server) {
         this.server = server;
     }
 
+    /**
+     * Run method for the MeshroomBot class.
+     * Controls the Meshroom application by using the Java Robot class.
+     * This class lets you take control over the mouse and keyboard of the computer running the bot.
+     * This method will open the application and drop the images that was taken by the UGV,
+     * in the application. Then it will start the rendering of the 3D-model and wait for the application to complete.
+     * When the application is complete it extracts the 3D-model from the application
+     * and updates the server with the newest 3D-model.
+     */
     @Override
     public void run()
     {
@@ -77,12 +93,14 @@ public class MeshroomBot implements Runnable {
         server.setProgress(12);
         System.out.println("Texturing Done");
 
-
         loadModel();
         closeWindows();
+        //Finds the files that was made by the Meshroom application.
         File objFile = getObjectFile("C:\\Users\\sondr\\Desktop\\MeshroomCache\\Texturing", "texturedMesh.obj");
         File mtlFile = getObjectFile("C:\\Users\\sondr\\Desktop\\MeshroomCache\\Texturing", "texturedMesh.mtl");
         File pngFile = getObjectFile("C:\\Users\\sondr\\Desktop\\MeshroomCache\\Texturing", "texture_0.png");
+
+        //Takes the byte array of each file and all three in the objectFile object. Then updates the server with a new objectFile.
         byte[] objContent = null;
         byte[] mtlContent = null;
         byte[] pngContent = null;
@@ -102,11 +120,18 @@ public class MeshroomBot implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        objectFile = new ObjectFile(objContent, objFile.getName(), "obj", mtlContent, mtlFile.getName(), "mtl", pngContent, pngFile.getName(), "png");
+        ObjectFile objectFile = new ObjectFile(objContent, objFile.getName(), "obj", mtlContent, mtlFile.getName(), "mtl", pngContent, pngFile.getName(), "png");
         server.setObjectFile(objectFile);
         server.setBotRunningFalse();
 
     }
+
+    /**
+     * This method takes in a string and writes it by using
+     * the correct key commands.
+     *
+     * @param s The string that will be written.
+     */
     private void type(String s)
     {
         byte[] bytes = s.getBytes();
@@ -121,6 +146,10 @@ public class MeshroomBot implements Runnable {
         }
     }
 
+    /**
+     * Print's the current position of the mouse with x and y coordinates.
+     * Also prints the pixel color from the coordinates.
+     */
     private void getMouseCoordinates()
     {
         PointerInfo pointerInfo = MouseInfo.getPointerInfo();
@@ -133,11 +162,18 @@ public class MeshroomBot implements Runnable {
         System.out.println("Pixel color: "+color);
     }
 
+    /**
+     * Moves the mouse down to the taskbar and clicks the Meshroom icon to open the program.
+     */
     private void openMeshroom()
     {
         moveMouseAndClick(1055, 1420);
     }
 
+    /**
+     * Prints out the mouse position 10 times with a second interval.
+     * This method is used for getting different mouse positions when making the bot.
+     */
     private void loopMouseCoordinates()
     {
         for(int i = 0; i<10; i++)
@@ -147,6 +183,12 @@ public class MeshroomBot implements Runnable {
         }
     }
 
+    /**
+     * Moves the mouse to the given position and clicks.
+     *
+     * @param x The x coordinate of the wanted mouse position.
+     * @param y The y coordinate of the wanted mouse position.
+     */
     private void moveMouseAndClick(int x, int y)
     {
         robot.mouseMove(x, y);
@@ -155,12 +197,23 @@ public class MeshroomBot implements Runnable {
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
     }
 
+    /**
+     * Opens the photo folder where the images from the UGV was saved.
+     */
     private void openPhotoFolder()
     {
         moveMouseAndClick(122, 1420);
         moveMouseAndClick(1230, 1217);
     }
 
+    /**
+     * Drags something on the computer from one position to a new.
+     *
+     * @param xInitial The initial x position of the item that will be dragged.
+     * @param yInitial The initial y position of the item that will be dragged.
+     * @param xEnd The end x position of the item that will be dragged.
+     * @param yEnd The end y position of the item that will be dragged.
+     */
     private void dragAndDrop(int xInitial, int yInitial, int xEnd, int yEnd)
     {
         robot.mouseMove(xInitial, yInitial);
@@ -171,23 +224,39 @@ public class MeshroomBot implements Runnable {
         robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
     }
 
+    /**
+     * Presses start on the Meshroom application.
+     */
     private void startMeshroomRender()
     {
         moveMouseAndClick(1677, 71);
         robot.delay(500);
     }
 
+    /**
+     * Waits for the chosen pixel to change to the given color.
+     *
+     * @param x The x coordinate of the pixel that will be watched.
+     * @param y The y coordinate of the pixel that will be watched.
+     * @param color The color that it will change to given in RGB.
+     */
     private void waitForPixelColor(int x, int y, Color color)
     {
         while (robot.getPixelColor(x, y).getRGB()!=color.getRGB()) robot.delay(1000);
     }
 
+    /**
+     * Presses load on the Meshroom application.
+     */
     private void loadModel()
     {
         moveMouseAndClick(2878, 665);
         robot.delay(1000);
     }
 
+    /**
+     * Closes the Meshroom and folder window.
+     */
     private void closeWindows()
     {
         moveMouseAndClick(3426, 16);
@@ -195,6 +264,9 @@ public class MeshroomBot implements Runnable {
         moveMouseAndClick(2259, 1011);
     }
 
+    /**
+     * Makes a save file on the desktop called UGV Model.
+     */
     private void makeSaveFile()
     {
         moveMouseAndClick(1677, 71);
@@ -210,6 +282,13 @@ public class MeshroomBot implements Runnable {
         robot.keyRelease(KeyEvent.VK_ENTER);
     }
 
+    /**
+     * Searches for a file by name in the given directory.
+     *
+     * @param pathName The path to the directory that will be searched trough.
+     * @param fileName The name of the file that will be searched for.
+     * @return Returns the file if it found else null.
+     */
     private File getObjectFile(String pathName, String fileName){
         File root = new File(pathName);
         try {
